@@ -2,6 +2,8 @@ import requests
 import json
 from crawler.__init__ import Crawler  
 import asyncio
+from dotenv import load_dotenv
+import os
 
 class AIAgent:
     def __init__(self, url: str):
@@ -121,7 +123,9 @@ class AIAgent:
 
     def scrapWeatherFunc(self, city_name: str, day: str, degreesType: str) -> str:
         units = "metric" if degreesType.lower() == "celsius" else "imperial"
-        api_key = "541757f7e20ed96b8c31eb7f9a01e979"
+        load_dotenv(dotenv_path="../.env")
+        api_key = os.getenv("API_KEY_METHEO")
+        
         weather_url = f"https://api.openweathermap.org/data/2.5/weather?q={city_name}&units={units}&appid={api_key}"
         try:
             res = requests.get(weather_url)

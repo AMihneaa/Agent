@@ -23,6 +23,14 @@ class DynamicScraping:
         self.selectors = {}
         self.filters = []
 
+    async def __aenter__(self):
+        await self.init_browser()
+        await self.navigate()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
+
     async def init_browser(self):
         self.playwright = await async_playwright().start()
         browser_launcher = getattr(self.playwright, self.browser_type)
