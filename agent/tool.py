@@ -1,5 +1,11 @@
 from agent.tool_function import calculateFunc, scrapWeatherFunc, crawlSubjectFunc
 
+tool_functions = {
+    "calculateFunc": calculateFunc,
+    "scrapWeatherFunc": scrapWeatherFunc,
+    "crawlSubjectFunc": crawlSubjectFunc
+}
+
 tools = {
     "calculateFunc": {
         "type": "function",

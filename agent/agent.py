@@ -3,7 +3,8 @@ import httpx
 import os
 from dotenv import load_dotenv
 from agent.tool_function import calculateFunc, scrapWeatherFunc, crawlSubjectFunc
-from agent.tool import tools
+from agent.tool import tools, tool_functions
+import inspect
 
 class AIAgent:
     def __init__(self, url: str):
@@ -16,25 +17,28 @@ class AIAgent:
             "temperature": 0.6,
             "max_tokens": 1024,
             "tools": self.define_tools(),
-            "tool-chain": "auto"
+            "tool-chain": "none"
         }
         self.executed_calls = set()
 
     def system_prompt(self):
         return (
-            "You are a helpful and strict AI agent.\n"
-            "\n"
             "Your job is to always use available tools to answer questions about:\n"
             "- Math: use `calculateFunc`\n"
             "- Weather: use `scrapWeatherFunc`\n"
             "- Public topics, events, people, or anything Wikipedia-related: use `crawlSubjectFunc`\n"
+            "- ONLY CALL THE FUNCTION 1 TIME"
             "\n"
-            "YOU MUST NOT try to answer yourself when a tool exists.\n"
-            "YOU MUST NOT assume the answer is unknown without calling the tool.\n"
+            "- ONLY CALL A TOOL ONCE with the same input. If you've already called it with specific arguments, do not call it again.\n"
+            "- Only call the same tool again if the input arguments are DIFFERENT from any previous calls.\n"
+            "- DO NOT answer by yourself if a tool exists.\n"
+            "- DO NOT say you don't know before calling the tool first.\n"
+            "- DO NOT guess answers.\n"
             "You MUST always call crawlSubjectFunc when the user asks about a person, concept, job, public figure, or country leader.\n"
             "\n"
             "When calling crawlSubjectFunc:\n"
             "  * You MUST include BOTH `subject` and `start_url` in your function call. Never include only subject. Both are REQUIRED.\n"
+            "  * Translate the subject to English before calling the function.\n"
             "  * For example: question = 'Who is the X?' → subject = 'x', start_url = 'https://en.wikipedia.org/wiki/x'\n"
             "- Always infer `subject` from the user's question.\n"
             "- Set `start_url` to 'https://en.wikipedia.org/wiki/' + subject with spaces replaced by underscores.\n"
@@ -60,22 +64,32 @@ class AIAgent:
                 res = await client.post(self.url, json=self.payload)
                 message = res.json()["choices"][0]["message"]
 
-                if "tool_calls" in message:
+                while "tool_calls" in message:
                     tool_messages = []
                     for call in message["tool_calls"]:
                         tool_name = call["function"]["name"]
-                        args = json.loads(call["function"]["arguments"])
-                        if (tool_name, json.dumps(args, sort_keys=True)) in self.executed_calls:
-                            continue
-                        self.executed_calls.add((tool_name, json.dumps(args, sort_keys=True)))
+                        raw_args = call["function"]["arguments"]
 
-                        func = tools.get(tool_name)
+                        try:
+                            args = json.loads(raw_args)
+                        except json.JSONDecodeError as e:
+                            print(f"[ERROR] JSON decode error: {e}")
+                            continue
+
+                        call_key = (tool_name, json.dumps(args, sort_keys=True))
+                        if call_key in self.executed_calls:
+                            print(f"[SKIP] Duplicate tool call: {tool_name} with same arguments")
+                            continue
+
+                        self.executed_calls.add(call_key)
+
+                        func = tool_functions.get(tool_name)
                         if not func:
                             result = f"Unknown tool: {tool_name}"
-                        elif tool_name == "calculateFunc":
-                            result = func(args.get("expression", ""))
-                        else:
+                        elif inspect.iscoroutinefunction(func):
                             result = await func(**args)
+                        else:
+                            result = func(**args)
 
                         tool_messages.append({
                             "role": "tool",
@@ -86,9 +100,10 @@ class AIAgent:
 
                     self.payload["messages"].extend(tool_messages)
                     follow_up = await client.post(self.url, json=self.payload)
-                    follow_msg = follow_up.json()["choices"][0]["message"]
-                    print("Model:", follow_msg["content"])
-                    self.payload["messages"].append(follow_msg)
-                else:
-                    print("Model:", message["content"])
+                    message = follow_up.json()["choices"][0]["message"]
                     self.payload["messages"].append(message)
+
+                if "content" in message:
+                    print("Model:", message["content"])
+                elif "tool_calls" not in message:
+                    print("[WARN] No 'content' or 'tool_calls' in message:", message)

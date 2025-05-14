@@ -1,4 +1,4 @@
-from agent.__init__ import AIAgent
+from agent.agent import AIAgent
 from dotenv import load_dotenv
 import os
 import asyncio
