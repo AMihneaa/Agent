@@ -1,1 +1,42 @@
-[]
+[
+  {
+    "title": "Laptop ASUS Vivobook 16 R1605VA-MB786, Intel Core i7-13700H pana la 5 GHz, 16\" WUXGA, 16 GB, SSD 512 GB, Intel Iris Xe, Windows 11 Pro, negru",
+    "price": "3.499,79 Lei"
+  },
+  {
+    "title": "Laptop Gaming ACEMAGIC 16.1-inch cu procesor AMD Ryzen 7 5825U, 16GB DDR4 512GB M.2 2280 NVMe SSD, IPS WIFI6, Windows 11 Pro",
+    "price": "2.734,86 Lei"
+  },
+  {
+    "title": "Laptop Acer Aspire 3 A315-59 cu procesor Intel® Core™ i5-1235U pana la 4.4 GHz, 15.6\", Full HD, 16GB DDR4, 512GB SSD, Intel® Iris® Xe Graphics, No OS, Pure Silver",
+    "price": "2.099,99 Lei"
+  },
+  {
+    "title": "Laptop Apple MacBook Air 13-inch, True Tone, procesor Apple M1 , 8 nuclee CPU si 7 nuclee GPU, 8GB, 256GB, Space Grey, INT KB",
+    "price": "3.955,29 Lei"
+  },
+  {
+    "title": "Laptop 14\" Win 11 Notebook 256 GB ROM Suporta SSD de expansiune 1TB WiFi 1080 FHD BT4.2 Mini HDMI cu mouse fara fir si autocolante pentru tastatura romana - Argintiu",
+    "price": "901,57 Lei"
+  },
+  {
+    "title": "Laptop Gaming MSI Thin 15 B12VE cu procesor Intel® Core™ i5-12450H pana la 4.4GHz, 15.6'', IPS, Full HD, 144Hz, 16GB DDR4 RAM, 1TB SSD, NVIDIA GeForce RTX 4050 6GB GDDR6, No OS, Cosmos Gray",
+    "price": "3.399,99 Lei"
+  },
+  {
+    "title": "Laptop Gaming ASUS ROG Zephyrus G16 GA605WV cu procesor AMD Ryzen™ AI 9 HX 370 pana la 5.1GHz, 16\", WQXGA, OLED, 240Hz, 16GB LPDDR5x, 1TB SSD, NVIDIA® GeForce RTX™ 4060 8GB GDDR6, No OS, PLATINUM WHITE",
+    "price": "9.399,99 Lei"
+  },
+  {
+    "title": "Laptop 14\" Win 11 Notebook 6+128 GB Suporta SSD de expansiune 1TB WiFi 1080 FHD BT4.2 Mini HDMI cu mouse fara fir si autocolante pentru tastatura romana-Gri",
+    "price": "969,99 Lei"
+  },
+  {
+    "title": "Laptop Lenovo IdeaPad 1 15IJL7 cu procesor Intel® Celeron® N5100 pana la 2.8GHz, 15.6\" Full HD, 4GB DDR4 RAM, 128GB eMMC 5.1, Intel® UHD Graphics, Windows® 11 Home, Cloud Grey",
+    "price": "1.049,99 Lei"
+  },
+  {
+    "title": "Laptop Acer Aspire Lite 15 cu procesor Intel® Celeron® N4500 pana la 2.8GHz, 15.6'', Full HD, IPS, 8GB LPDDR4X, 256GB SSD, Intel® UHD Graphic, No OS, Pure Silver",
+    "price": "1.099,99 Lei"
+  }
+]

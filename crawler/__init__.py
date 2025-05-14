@@ -12,13 +12,14 @@ class Crawler:
     
     __redis = redis.Redis(host='localhost', port=6379, db=0)
 
-    def __init__(self, URL: str = "", subject: str = "") -> None:
+    def __init__(self, URL: str = "", subject: str = "", max_urls: int = 50) -> None:
         self.__url = URL
         self.__data_html = None
         self.__soup = None
         self.__subject_filter = subject
         self.__semaphore = asyncio.Semaphore(50)
         self.__results = []
+        self.__max_urls = max_urls
         self.__redis.delete("visited_urls")
 
     @property
@@ -40,6 +41,10 @@ class Crawler:
     @url.setter
     def url(self, URL: str) -> None:
         self.__url = URL
+
+    @property
+    def results(self):
+        return self.__results
 
     async def asyncFetch(self, url: str, session: aiohttp.ClientSession) -> Optional[str]:
         if self.__redis.sismember("visited_urls", url):
@@ -99,12 +104,16 @@ class Crawler:
 
         return links
 
-    async def multi_crawler_async(self, url: str, depth: int = 0, max_depth: int = 2, tolerant_depth: int = 4, session=None):
+    async def multi_crawler_async(self, url: str, depth: int = 0, max_depth: int = 1, tolerant_depth: int = 1, session=None):
         if depth > tolerant_depth or self.__redis.sismember("visited_urls", url):
             return
 
+        if len(self.__results) >= self.__max_urls:
+            return
+
         if session is None:
-            async with aiohttp.ClientSession() as new_session:
+            timeout = aiohttp.ClientTimeout(total=5)
+            async with aiohttp.ClientSession(timeout=timeout) as new_session:
                 await self.multi_crawler_async(url, depth, max_depth, tolerant_depth, session=new_session)
                 return
 
@@ -112,40 +121,39 @@ class Crawler:
         if html is None or self.__soup is None:
             return
 
-        go_deeper = False
-        if self.__subject_filter and self.__subject_filter.lower() in self.__soup.get_text().lower():
-            title = self.__soup.title.string if self.__soup.title else "No title"
-            print(f"URL: [{url}] \t Depth: {depth}, title: {title}")
+        page_text = self.__soup.get_text().lower()
+        if self.__subject_filter.lower() not in page_text:
+            return  # nu continuăm pe pagini irelevante
 
-            first_paragraph = self.__soup.find("p")
-            snippet = first_paragraph.get_text(strip=True) if first_paragraph else ""
+        # pagina e relevantă → salvăm
+        title = self.__soup.title.string if self.__soup.title else "No title"
+        first_paragraph = self.__soup.find("p")
+        snippet = first_paragraph.get_text(strip=True) if first_paragraph else ""
 
-            self.__results.append({
-                "url": url,
-                "title": title,
-                "snippet": snippet,
-            })
-            go_deeper = True
-        elif depth < max_depth:
-            go_deeper = True
+        self.__results.append({
+            "url": url,
+            "title": title,
+            "snippet": snippet,
+        })
 
-        if not go_deeper:
+        if len(self.__results) >= self.__max_urls or depth >= max_depth:
             return
 
         links = self.linkExtractor()
+        tasks = []
 
-        tasks = [
-            self.multi_crawler_async(link['url'], depth + 1, max_depth, tolerant_depth, session)
-            for link in links
-            if isinstance(link, dict)
-            and 'url' in link
-            and not self.__redis.sismember("visited_urls", link['url'])
-            and self.is_valid(link['url'])
-        ]
+        for link in links:
+            link_url = link.get("url", "")
+            if len(self.__results) >= self.__max_urls:
+                break
+            if self.is_valid(link_url) and not self.__redis.sismember("visited_urls", link_url):
+                if self.__subject_filter.lower() in link["text"].lower():  # extra filtru
+                    tasks.append(self.multi_crawler_async(link_url, depth + 1, max_depth, tolerant_depth, session))
 
         if tasks:
             await asyncio.gather(*tasks)
-            await asyncio.sleep(0.1)
+
+            
 
     async def fetchPage(self, url) -> None:
         async with self.__semaphore:
