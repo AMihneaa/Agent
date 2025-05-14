@@ -49,21 +49,18 @@ Agent/
 - Chooses tools using a mapping (`tools` dict).
 - Executes tool functions and formats the results as agent responses.
 
-### `agent/tool_funcs.py`
+### `agent/tool_func.py`
 Callable tools include:
 - `crawlSubjectFunc(subject: str, depth: int)` – Wikipedia crawler with Redis caching.
 - `scrapWeatherFunc(location: str)` – Web scraper for weather.
 - `calculateFunc(expression: str)` – Mathematical evaluator.
 - `scrapeDynamicProduct(link: str)` – Uses Playwright to extract product name, price, and specs from eMAG.
 
-### `crawler/crawl.py`
-- Wikipedia crawler with `asyncio` and `aiohttp`.
+### `crawler/__init__`
+- Static scraping using aiohttp and regex/html parsing.
+- Designed for structured info like weather
 - Controls crawling depth and applies filters from `filter.json`.
 - Uses Redis to **cache visited URLs**, preventing redundant work and improving performance.
-
-### `crawler/scrap.py`
-- Static scraping using aiohttp and regex/html parsing.
-- Designed for structured info like weather.
 
 ### `crawler/dynamic_scraper.py`
 - Dynamic headless browser-based scraping using `Playwright`.
