@@ -99,7 +99,7 @@ Sample prompts in `main.py`:
 run_agent("calculate 2 + 2")
 run_agent("scrap weather in Bucharest")
 run_agent("crawl subject Artificial Intelligence depth 2")
-run_agent("scrape emag link https://www.emag.ro/product-id")
+run_agent("scrap emag for top 10 laptops with 16 GB Ram and Intel i7")
 ```
 
 ## 🧠 How It Works
@@ -116,25 +116,8 @@ run_agent("scrape emag link https://www.emag.ro/product-id")
 - Integration with vector databases for semantic memory.
 - Embed product summaries using LLM.
 
-## 🤝 Contributing
-
-We welcome contributions to this project! Please follow these steps:
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/YourFeature`).
-3. Make your changes and commit them (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature/YourFeature`).
-5. Open a pull request.
-
 ## 📄 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 Built by Mihnea – for intelligent automation and web interaction with Python.
-
-## ❓ FAQ
-
-**Q: How do I install dependencies?**
-A: Use the command `pip install -r requirements.txt`.
-
-**Q: Can I contribute to this project?**
-A: Yes, contributions are welcome! Please refer to the Contributing section.
